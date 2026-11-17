@@ -1,0 +1,24 @@
+{
+  "name": "kindling",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "solidhat:compile": "solidhat compile",
+    "solidhat:typegen": "solidhat typegen",
+    "solidhat:test": "solidhat test",
+    "solidhat:deploy": "solidhat deploy",
+    "solidhat:clean": "solidhat clean",
+    "demo:dev": "solidhat compile && vite",
+    "demo:build": "solidhat compile && vite build",
+    "demo:cli": "solidhat compile && node demo/cli.ts"
+  },
+  "devDependencies": {
+    "@solidcash/solidhat": "^0.51.0",
+    "typescript": "^5.9.2",
+    "vite": "^7.3.8",
+    "vitest": "^5.0.4"
+  },
+  "description": "All-or-nothing crowdfunding on Bitcoin Cash, written in Solidity syntax and compiled with SolidCash.",
+  "license": "MIT"
+}

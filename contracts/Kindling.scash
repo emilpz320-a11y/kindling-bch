@@ -1,0 +1,78 @@
+pragma solidcash ^0.51.0;
+pragma satoshicontainer single;
+
+// Kindling: all-or-nothing crowdfunding on Bitcoin Cash.
+// Backers pledge BCH into the contract. If the goal is reached the creator claims it;
+// if the deadline passes without reaching the goal, every backer can take their pledge back.
+
+library PledgeMath {
+    function reached(int raised, int goal) internal pure returns (bool) {
+        return raised >= goal;
+    }
+}
+
+abstract contract Owned(pubkey creator) {
+    modifier onlyCreator(sig s) {
+        require(checkSig(s, creator));
+        _;
+    }
+}
+
+contract Kindling(pubkey creator, int goal, int deadline) is Owned(creator) {
+    using PledgeMath for int;
+
+    enum Phase { Open, Claimed }
+
+    int constant MIN_PLEDGE = 10000;
+
+    int public raised;
+    int public backers;
+    Phase public phase;
+    mapping(bytes20 => int) public pledges;
+
+    event Pledged(bytes20 indexed backer, int amount, int raised);
+    event Claimed(int amount);
+    event Refunded(bytes20 indexed backer, int amount);
+
+    error PledgeTooSmall(int amount);
+    error CampaignClosed();
+    error NothingToRefund();
+
+    modifier whileOpen() {
+        require(this.phase == Phase.Open, CampaignClosed());
+        _;
+    }
+
+    function pledge(pubkey backer, sig s) public payable whileOpen {
+        require(checkSig(s, backer));
+        require(msg.value >= MIN_PLEDGE, PledgeTooSmall(msg.value));
+        bytes20 id = hash160(backer);
+        if (this.pledges[id] == 0) {
+            this.backers += 1;
+        }
+        this.pledges[id] += msg.value;
+        this.raised += msg.value;
+        emit Pledged(id, msg.value, this.raised);
+    }
+
+    function claim(sig s) public onlyCreator(s) whileOpen {
+        require(this.raised.reached(goal), "goal not reached");
+        int amount = this.raised;
+        this.phase = Phase.Claimed;
+        this.transfer(new LockingBytecodeP2PKH(hash160(creator)), amount);
+        emit Claimed(amount);
+    }
+
+    function refund(pubkey backer, sig s) public whileOpen {
+        require(checkSig(s, backer));
+        require(tx.time >= deadline, "campaign still running");
+        require(!this.raised.reached(goal), "goal reached");
+        bytes20 id = hash160(backer);
+        int amount = this.pledges[id];
+        require(amount > 0, NothingToRefund());
+        this.pledges[id] = 0;
+        this.raised -= amount;
+        this.transfer(new LockingBytecodeP2PKH(id), amount);
+        emit Refunded(id, amount);
+    }
+}
