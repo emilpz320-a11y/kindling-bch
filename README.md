@@ -9,6 +9,8 @@ take their own pledge back. Nobody, including the creator, can move a backer's p
 
 Built for the BCH BLAZE 2026 bounty "Best SolidCash Application".
 
+**Live demo:** https://emilpz320-a11y.github.io/kindling-bch/ · **Upstream fix:** [solidcash/solidcash#6](https://github.com/solidcash/solidcash/pull/6)
+
 ## The contract
 
 [`contracts/Kindling.scash`](contracts/Kindling.scash) is a stateful SolidCash contract: its state lives in CashToken
@@ -76,8 +78,8 @@ fund the public development mnemonic.
 A stateful call that checks `tx.time` and then pays from the satoshi container, sent with `.setLocktime()` and no
 manual `.transfer()`, failed during the SDK's automatic derivation. The first derivation probe runs before the
 locktime is applied and stops at the CLTV check; the re-derivation with the locktime did not derive transfers. This
-project passes `.transfer()` explicitly in `refund` as a workaround, and the fix is proposed upstream to
-[solidcash/solidcash](https://github.com/solidcash/solidcash).
+project passes `.transfer()` explicitly in `refund` as a workaround, and the fix is proposed upstream in
+[solidcash/solidcash#6](https://github.com/solidcash/solidcash/pull/6).
 
 ## Security notes
 
