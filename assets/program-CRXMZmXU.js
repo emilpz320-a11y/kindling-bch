@@ -1,0 +1,1 @@
+import{hexToBin as s,binToHex as a}from"./hex-6kv1J7MV.js";import{v as i,l as f}from"./oracle-pool-D2GJQEqp.js";function d(n,l){const o=s(n),e=l.toLowerCase();if(o.length*2!==e.length)return!1;const t=i(o);if(t.length===0)return n.toLowerCase()===e;const r=t[0]+1,c=s(e.slice(r*2,(r+32)*2));return a(f(o,c.reverse(),t))===e}export{d as m};
